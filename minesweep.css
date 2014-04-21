@@ -18,6 +18,10 @@ td.unopened {
 td.opened {
   background: url('img/opened.svg');
 }
+td.flagged {
+  background: url('img/flag.svg');
+  cursor: pointer;
+}
 td.mine {
   background: url('img/mine.png');
 }
