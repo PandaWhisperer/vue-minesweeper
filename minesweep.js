@@ -3,7 +3,7 @@ var COLUMNS = 20;
 
 var TILES = [];  // Matrix of tiles (td elements)
 
-function flag_tile(td) {
+function flagTile(td) {
   var td = $(td);
   if (td.hasClass('flagged')) {
     td.removeClass().addClass('unopened');
@@ -12,7 +12,7 @@ function flag_tile(td) {
   }
 }
 
-function open_tile(td, unvealing_all = false) {
+function openTile(td, unvealing_all = false) {
   var td = $(td);
   if (!td.hasClass('unopened')) {
     return;
@@ -25,17 +25,17 @@ function open_tile(td, unvealing_all = false) {
   if (TILES[row][column].data('mined')) {
     td.removeClass().addClass('mine');
     if (!unvealing_all) {
-      unveal_all();
+      unvealAll();
     }
   } else {
-    var neighbour_mines = count_neighbour_mines(td);
+    var neighbour_mines = countNeighbourMines(td);
     if (neighbour_mines == 0) {
       td.removeClass().addClass('opened');
 
       if (!unvealing_all) {
         var the_neighbours = neighbours(td);
         for (var i = 0; i < the_neighbours.length; i++) {
-          open_tile(the_neighbours[i]);
+          openTile(the_neighbours[i]);
         }
       }
     } else {
@@ -44,17 +44,17 @@ function open_tile(td, unvealing_all = false) {
   }
 }
 
-function roll_dice() {
+function rollDice() {
   return Math.round(Math.random() * 6) + 1;
 }
 
-function unveal_all() {
+function unvealAll() {
   $('td.unopened').each(function(i, item) {
-    open_tile(item, true);
+    openTile(item, true);
   });
 }
 
-function count_neighbour_mines(td) {
+function countNeighbourMines(td) {
   var neighbour_mines = 0;
   var the_neighbours = neighbours(td);
   for (var i = 0; i < the_neighbours.length; i++) {
@@ -107,7 +107,7 @@ function initialize(minesweep) {
       var td = $('<td class="unopened" />').data({
         row: row,
         column: column,
-        mined: (roll_dice() == 6)
+        mined: (rollDice() == 6)
       });
       TILES[row][column] = td;
       tr.append(td);
@@ -124,10 +124,10 @@ $(document).ready(function() {
   minesweep.find('td').on('mousedown', function(event) {
     switch (event.which) {
       case 3:  // Right click
-        flag_tile(event.target);
+        flagTile(event.target);
         break;
       default:
-        open_tile(event.target);
+        openTile(event.target);
     }
   });
 });
