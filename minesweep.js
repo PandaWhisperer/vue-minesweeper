@@ -12,7 +12,7 @@ function flagTile(td) {
   }
 }
 
-function openTile(td, unvealing_all = false) {
+function openTile(td, unvealing_all) {
   var td = $(td);
   if (!td.hasClass('unopened')) {
     return;
@@ -35,7 +35,7 @@ function openTile(td, unvealing_all = false) {
       if (!unvealing_all) {
         var the_neighbours = neighbours(td);
         for (var i = 0; i < the_neighbours.length; i++) {
-          openTile(the_neighbours[i]);
+          openTile(the_neighbours[i], false);
         }
       }
     } else {
@@ -127,7 +127,7 @@ $(document).ready(function() {
         flagTile(event.target);
         break;
       default:
-        openTile(event.target);
+        openTile(event.target, false);
     }
   });
 });

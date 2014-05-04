@@ -1,3 +1,18 @@
+body {
+  font-family: Helvetica, sans-serif;
+  background: #333;
+}
+
+footer {
+  text-align: center;
+  margin-top: 8em;
+}
+
+footer a {
+  color: #aaa;
+  font-size: 32px;
+}
+
 .container {
   padding-top: 10em;
 }
