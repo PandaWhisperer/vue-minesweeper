@@ -20,6 +20,7 @@ table#minesweep {
   margin: auto;
   border: 1px solid #999;
   border-collapse: collapse;
+  background-color: #ddd;
 }
 table#minesweep td {
   width: 24px;
