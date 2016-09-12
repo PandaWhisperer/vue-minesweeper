@@ -2,15 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Minesweeper - jQuery</title>
+    <title>Minesweeper - Vue.js</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="minesweep.css">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <script src="https://npmcdn.com/vue@1.0.26/dist/vue.js"></script>
   </head>
 
   <body>
     <div class="container">
       <table id="minesweep">
+        <tr v-for="(r,row) in tiles">
+          <td v-for="(c,tile) in row"
+              @click="openTile(r, c)"
+              @contextmenu.prevent="flagTile(r, c)"
+              :class="tile.classes">
+          </td>
+        </tr>
       </table>
     </div>
     <footer>
@@ -18,7 +26,6 @@
         <i class="fa fa-github-square" title="View source on GitHub"></i>
       </a>
     </footer>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js">
     </script>
     <script type="text/javascript" src="minesweep.js"></script>
   </body>

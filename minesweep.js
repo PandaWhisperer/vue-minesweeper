@@ -1,133 +1,118 @@
-var ROWS = 10;
-var COLUMNS = 20;
+var ROWS = 10, COLS = 20;
 
-var TILES = [];  // Matrix of tiles (td elements)
-
-function flagTile(td) {
-  var td = $(td);
-  if (td.hasClass('flagged')) {
-    td.removeClass().addClass('unopened');
-  } else {
-    td.removeClass().addClass('flagged');
-  }
-}
-
-function openTile(td, unvealing_all) {
-  var td = $(td);
-  if (!td.hasClass('unopened')) {
-    return;
-  }
-
-  var row = td.data('row');
-  var column = td.data('column');
-  console.log("Opening tile " + row + ", " + column);
-
-  if (TILES[row][column].data('mined')) {
-    td.removeClass().addClass('mine');
-    if (!unvealing_all) {
-      unvealAll();
-    }
-  } else {
-    var neighbour_mines = countNeighbourMines(td);
-    if (neighbour_mines == 0) {
-      td.removeClass().addClass('opened');
-
-      if (!unvealing_all) {
-        var the_neighbours = neighbours(td);
-        for (var i = 0; i < the_neighbours.length; i++) {
-          openTile(the_neighbours[i], false);
-        }
-      }
-    } else {
-      td.removeClass().addClass('mine-neighbour-' + neighbour_mines);
-    }
-  }
-}
-
-function rollDice() {
-  return Math.round(Math.random() * 6) + 1;
-}
-
-function unvealAll() {
-  $('td.unopened').each(function(i, item) {
-    openTile(item, true);
-  });
-}
-
-function countNeighbourMines(td) {
-  var neighbour_mines = 0;
-  var the_neighbours = neighbours(td);
-  for (var i = 0; i < the_neighbours.length; i++) {
-    var column = the_neighbours[i].data('column');
-    var row = the_neighbours[i].data('row');
-    if (TILES[row][column].data('mined')) {
-      neighbour_mines++;
-    }
-  }
-  return neighbour_mines;
-}
-
-function neighbours(td) {
-  var td = $(td);
-  var row = td.data('row');
-  var column = td.data('column');
-  var the_neighbours = [];
-
-  for (var row_offset = -1; row_offset <= 1; row_offset++) {
-    for (var column_offset = -1; column_offset <= 1; column_offset++) {
-      if (row_offset != 0 || column_offset != 0) {
-        var neighbour_row = row + row_offset;
-        var neighbour_column = column + column_offset;
-        if (within_range(neighbour_row, neighbour_column)) {
-          the_neighbours.push(TILES[neighbour_row][neighbour_column]);
-        }
+var app = new Vue({
+  el: '#minesweep',
+  data: {
+    tiles: []
+  },
+  created() {
+    for (var row = 0; row < ROWS; row++) {
+      this.tiles[row] = Array(COLS);
+      for (var col = 0; col < COLS; col++) {
+        this.tiles[row][col] = {
+          row, col,
+          mined: Math.random() * 6 > 5,
+          classes: ['unopened']
+        };
       }
     }
-  }
-
-  return the_neighbours;
-}
-
-function within_range(row, column) {
-  if (row < 0 || row >= TILES.length) {
-    return false;
-  }
-  if (column < 0 || column >= TILES[0].length) {
-    return false;
-  }
-  return true;
-}
-
-function initialize(minesweep) {
-  for (var row = 0; row < ROWS; row++) {
-    var tr = $('<tr />');
-    TILES[row] = [];
-
-    for (var column = 0; column < COLUMNS; column++) {
-      var td = $('<td class="unopened" />').data({
-        row: row,
-        column: column,
-        mined: (rollDice() == 6)
+  },
+  methods: {
+    updateTile(row, column, cb) {
+      // cannot manipulates `tiles` directly –
+      // need to replace array in order to trigger re-render
+      this.tiles = this.tiles.map(function(_row, r) {
+        return _row.map(function(tile, c) {
+          if (r == row && c == column) {
+            tile = cb.call(this, tile);
+          }
+          return tile;
+        });
       });
-      TILES[row][column] = td;
-      tr.append(td);
+    },
+
+    flagTile(row, column) {
+      console.log('flagTile', arguments)
+      this.updateTile(row, column, function(tile) {
+        if (tile.classes.indexOf('flagged') >= 0) {
+          tile.classes = ['unopened']
+        } else {
+          tile.classes = ['flagged']
+        }
+        return tile;
+      });
+    },
+
+    openTile(row, column, unvealing_all) {
+      console.log('openTile', arguments);
+      var tile = this.tiles[row][column];
+
+      // do nothing if tile isn't unopened
+      if (tile.classes.indexOf('unopened') < 0) {
+        return;
+      }
+
+      if (tile.mined) {
+        this.updateTile(row, column, function(tile) {
+          tile.classes = ['mine']; return tile;
+        });
+        if (!unvealing_all) {
+          this.unvealAll();
+        }
+      } else {
+        var neighbourMines = this.countNeighbourMines(tile);
+        if (neighbourMines == 0) {
+          this.updateTile(row, column, function(tile) {
+            tile.classes = ['opened']; return tile;
+          });
+
+          if (!unvealing_all) {
+            this.neighbours(tile).forEach(nTile => {
+              this.openTile(nTile.row, nTile.col, false);
+            });
+          }
+        } else {
+          this.updateTile(row, column, function(tile) {
+            tile.classes =
+            ['mine-neighbour-' + neighbourMines]; return tile;
+          });
+        }
+      }
+    },
+
+    unvealAll() {
+      this.tiles.forEach((row, r) => {
+        row.forEach((tile, c) => {
+          this.openTile(r, c, true);
+        });
+      })
+    },
+
+    countNeighbourMines(tile) {
+      return this.neighbours(tile).filter((neighbour) => {
+        return neighbour.mined;
+      }).length;
+    },
+
+    neighbours(tile) {
+      var theNeighbours = [];
+
+      [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1],
+       [1, -1], [1, 0], [1, 1]].forEach((offset) => {
+          var x = tile.row + offset[0],
+              y = tile.col + offset[1];
+
+          if (this.valid(x, y)) {
+            theNeighbours.push(this.tiles[x][y]);
+          }
+       });
+
+      return theNeighbours;
+    },
+
+    valid(row, column) {
+      return (row >= 0 && row < this.tiles.length) &&
+             (column >= 0 && column < this.tiles[0].length);
     }
-    minesweep.append(tr);
   }
-}
-
-$(document).ready(function() {
-  document.oncontextmenu = function() {return false;};
-
-  var minesweep = $('#minesweep');
-  initialize(minesweep);
-  minesweep.find('td').on('mousedown', function(event) {
-    switch (event.which) {
-      case 3:  // Right click
-        flagTile(event.target);
-        break;
-      default:
-        openTile(event.target, false);
-    }
-  });
 });
