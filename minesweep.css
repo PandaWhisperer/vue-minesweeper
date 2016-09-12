@@ -16,13 +16,17 @@ footer a {
 .container {
   padding-top: 10em;
 }
-table#minesweep {
+.controls {
+  text-align: center;
+  padding-bottom: 1em;
+}
+table.minesweeper {
   margin: auto;
   border: 1px solid #999;
   border-collapse: collapse;
   background-color: #ddd;
 }
-table#minesweep td {
+table.minesweeper td {
   width: 24px;
   height: 24px;
   background-size: cover;

@@ -1,23 +1,25 @@
-var ROWS = 10, COLS = 20;
-
 var app = new Vue({
   el: '#minesweep',
   data: {
+    rows: 10,
+    columns: 20,
     tiles: []
   },
   created() {
-    for (var row = 0; row < ROWS; row++) {
-      this.tiles[row] = Array(COLS);
-      for (var col = 0; col < COLS; col++) {
-        this.tiles[row][col] = {
-          row, col,
-          mined: Math.random() * 6 > 5,
-          classes: ['unopened']
-        };
-      }
-    }
+    this.newGame();
   },
   methods: {
+    newGame() {
+      console.log('newGame', arguments);
+      this.tiles = Array(this.rows).fill(0).map((_, row) => {
+        return Array(this.columns).fill(0).map((_, col) => ({
+            row, col,
+            mined: Math.random() * 6 > 5,
+            classes: ['unopened']
+          }));
+        });
+    },
+
     updateTile(row, column, cb) {
       // cannot manipulates `tiles` directly –
       // need to replace array in order to trigger re-render

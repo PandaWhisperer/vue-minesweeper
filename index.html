@@ -11,15 +11,20 @@
 
   <body>
     <div class="container">
-      <table id="minesweep">
-        <tr v-for="(r,row) in tiles">
-          <td v-for="(c,tile) in row"
-              @click="openTile(r, c)"
-              @contextmenu.prevent="flagTile(r, c)"
-              :class="tile.classes">
-          </td>
-        </tr>
-      </table>
+      <div id="minesweep">
+        <div class="controls">
+          <button @click="newGame()">New Game</button>
+        </div>
+        <table class="minesweeper">
+          <tr v-for="(r,row) in tiles">
+            <td v-for="(c,tile) in row"
+                @click="openTile(r, c)"
+                @contextmenu.prevent="flagTile(r, c)"
+                :class="tile.classes">
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
     <footer>
       <a href="https://github.com/PandaWhisperer/vue-minesweeper">
